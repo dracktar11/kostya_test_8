@@ -2,6 +2,9 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+
+	_ "modernc.org/sqlite"
 )
 
 type Client struct {
@@ -13,7 +16,36 @@ type Client struct {
 }
 
 func main() {
+	db, err := sql.Open("sqlite", "demo.db")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
 
+	client, err := selectClient(db, 1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(client)
+
+	newID, err := insertClient(db, Client{
+		FIO:      "Иванов Иван Иванович",
+		Login:    "ivanov",
+		Birthday: "20000101",
+		Email:    "ivanov@mail.ru",
+	})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(newID)
+
+	if err = deleteClient(db, newID); err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 
 func selectClient(db *sql.DB, id int) (Client, error) {
